@@ -104,5 +104,6 @@
     <!-- Deprecated plugins element. Remove in 3.0 -->
     <plugins>
         <plugin name="WebIntent" value="com.borismus.webintent.WebIntent" />
+        <plugin name="Base64ToPNG" value="org.apache.cordova.Base64ToPNG"/>
     </plugins>
 </widget>

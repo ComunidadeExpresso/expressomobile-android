@@ -1,5 +1,11 @@
 package com.borismus.webintent;
 
+import com.celepar.expresso.MainActivity;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +19,8 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 import android.text.Html;
 
@@ -70,7 +78,48 @@ public class WebIntent extends CordovaPlugin {
 	            //return new PluginResult(PluginResult.Status.OK);
 	            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 	            return true;
+	        } else if (action.equals("saveImage")) {
+	        	
+	        	try {
 
+	                String b64String = "";
+//	                if (b64String.startsWith("data:image")) {
+//	                    b64String = args.getString(0).substring(21);
+//	                } else {
+	                    b64String = args.getString(0);
+//	                }
+	                JSONObject params = args.getJSONObject(1);
+
+	                //Optional parameter
+	                String filename = params.has("filename")
+	                        ? params.getString("filename")
+	                        : "b64Image_" + System.currentTimeMillis() + ".png";
+
+	                String folder = params.has("folder")
+	                        ? params.getString("folder")
+	                        : Environment.getExternalStorageDirectory() + "/Pictures";
+
+	                Boolean overwrite = params.has("overwrite") 
+	                        ? params.getBoolean("overwrite") 
+	                        : false;
+
+	                this.saveImage(b64String, filename, folder, overwrite, callbackContext);
+
+	            } catch (JSONException e) {
+
+	                e.printStackTrace();
+	                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION, e.getMessage()));
+	                return false;
+
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION, e.getMessage()));
+	                return false;
+	            }
+	            
+	            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+	            return true;
+	        	
 	        } else if (action.equals("hasExtra")) {
 	            if (args.length() != 1) {
 	                //return new PluginResult(PluginResult.Status.INVALID_ACTION);
@@ -82,7 +131,16 @@ public class WebIntent extends CordovaPlugin {
 	            //return new PluginResult(PluginResult.Status.OK, i.hasExtra(extraName));
 	            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, i.hasExtra(extraName)));
 	            return true;
-
+	            
+	        } else if (action.equals("clearCookies")) {
+	        	
+	        	Log.v("ClearCookies","Clear Cookies");
+	        	
+	        	MainActivity act = (MainActivity)this.cordova.getActivity();
+	        	act.clearCookies();
+	        	
+//	        	callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, ""));
+	        	
 	        } else if (action.equals("getExtra")) {
 	            if (args.length() != 1) {
 	                //return new PluginResult(PluginResult.Status.INVALID_ACTION);
@@ -236,5 +294,47 @@ public class WebIntent extends CordovaPlugin {
         }
 
         ((DroidGap)this.cordova.getActivity()).sendBroadcast(intent);
+    }
+    
+    private boolean saveImage(String b64String, String fileName, String dirName, Boolean overwrite, CallbackContext callbackContext) throws InterruptedException, JSONException {
+
+        try {
+
+            //Directory and File
+            File dir = new File(dirName);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File file = new File(dirName, fileName);
+            
+            
+
+            //Avoid overwriting a file
+            if (!overwrite && file.exists()) {
+                return false;
+            }
+
+            //Decode Base64 back to Binary format
+            int flags = Base64.DEFAULT;
+            
+            byte[] decodedBytes = Base64.decode(b64String.getBytes(),flags);
+
+            //Save Binary file to phone
+            file.createNewFile();
+            FileOutputStream fOut = new FileOutputStream(file);
+            fOut.write(decodedBytes);
+            fOut.close();
+            
+            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, dirName.concat("/").concat(fileName)));
+            
+            return true;
+
+        } catch (FileNotFoundException e) {
+        	callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "File not Found!"));
+            return false;
+        } catch (IOException e) {
+        	callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, e.getMessage()));
+            return false;
+        }
     }
 }
