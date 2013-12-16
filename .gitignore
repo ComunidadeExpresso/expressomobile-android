@@ -1,4 +1,10 @@
 
+*.class
+
+bin/*.jar
+
+bin/*
+
 bin/dexedLibs/android-support-v4-d07f9d5f7441335dab59eb2636d19da8.jar
 
 bin/Expresso.apk
@@ -8,3 +14,15 @@ bin/dexedLibs/cordova-2.9.0-8cd5bafbe4ec64b4b9ab63c4de4506ae.jar
 bin/resources.ap_
 
 bin/resources.ap_
+
+bin/classes/com/celepar/expresso/MainActivity.class
+
+bin/classes/com/celepar/expresso/R$string.class
+
+bin/classes/com/celepar/expresso/R$style.class
+
+bin/classes/com/celepar/expresso/R$xml.class
+
+bin/classes.dex
+
+bin/AndroidManifest.xml
