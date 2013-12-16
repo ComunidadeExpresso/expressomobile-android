@@ -1,8 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
 
     <string name="app_name">Expresso</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    
+    <string name="login_success">Bem vindo ao Expresso</string>
+    <string name="empty_login">Usuário não informado</string>
+    <string name="empty_password">Senha não informada</string>
+    <string name="unavailable_network">Sem conexão de rede</string>
+    <string name="timeout_network">Tempo esgotado de conexão</string>
+    <string name="unavailable_service">Serviço indisponível</string>
+    <string name="invalid_service">Serviço inválido</string>
+    <string name="forbidden_access_service">Acesso negado ao serviço</string>
+    <string name="not_allowed_method">Método não permitido</string>
+    <string name="waiting_for_server">Aguarde, conectando no servidor</string>
+    <string name="settings">Configurações</string>
 
 </resources>

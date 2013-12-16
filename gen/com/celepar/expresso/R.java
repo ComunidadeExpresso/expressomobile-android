@@ -24,8 +24,19 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f050000;
+        public static final int empty_login=0x7f050004;
+        public static final int empty_password=0x7f050005;
+        public static final int forbidden_access_service=0x7f05000a;
         public static final int hello_world=0x7f050001;
+        public static final int invalid_service=0x7f050009;
+        public static final int login_success=0x7f050003;
         public static final int menu_settings=0x7f050002;
+        public static final int not_allowed_method=0x7f05000b;
+        public static final int settings=0x7f05000d;
+        public static final int timeout_network=0x7f050007;
+        public static final int unavailable_network=0x7f050006;
+        public static final int unavailable_service=0x7f050008;
+        public static final int waiting_for_server=0x7f05000c;
     }
     public static final class style {
         /** 

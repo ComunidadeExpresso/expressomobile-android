@@ -11,17 +11,19 @@ import org.apache.cordova.*;
 
 public class MainActivity extends DroidGap {
 	
-//	@Override
-//	public void init() {
-//	    super.init();       
+	@Override
+	public void init() {
+	    super.init();
 //	    this.appView.getSettings().setNavDump(false);
-//	}
+	}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
+        super.init();
+        this.registerForContextMenu(this.appView);
         
         CookieSyncManager.createInstance(this);
         CookieManager cookieManager = CookieManager.getInstance();
@@ -38,8 +40,16 @@ public class MainActivity extends DroidGap {
         
         // 
         
+//        Bundle extras = getIntent().getExtras();
+//        String message = extras.getString("url");
+//        if(message == "notify"){
+//        	super.loadUrl("file:///android_asset/www/index-2.9.0.html");
+//        }else{
+//        	super.loadUrl("file:///android_asset/www/index_android.html");
+//        }
+        
         super.loadUrl("file:///android_asset/www/index_android.html");
-//        CookieManager.setAcceptFileSchemeCookies(false);
+        
     }
     
     public void clearCookies() {
@@ -56,6 +66,7 @@ public class MainActivity extends DroidGap {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+    	
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
