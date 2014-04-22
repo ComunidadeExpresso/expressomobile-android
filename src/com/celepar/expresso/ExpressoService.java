@@ -13,6 +13,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,7 +32,7 @@ public class ExpressoService extends BackgroundService {
 	
 	private String mAuth = "null";
 	
-	private String mApiURL = "http://api.expresso.pr.gov.br/";
+	private String mApiURL = "";
 	
 	private String mUsername = "";
 	
@@ -54,28 +55,52 @@ public class ExpressoService extends BackgroundService {
 			
 			this.lastCheckDate = new Date(System.currentTimeMillis());
 			
-			//Log.d(TAG, msg);
 //		} catch (JSONException e) {
 //		}
 		
 		return result;	
 	}
 	
-	public void showNotification( String contentTitle, String contentText , String routeURL) {
-		int icon = R.drawable.ic_launcher;
-        long when = System.currentTimeMillis();
-        
-        Notification notification = new Notification(icon, contentTitle, when);
+	public void showNotification( String contentTitle, String contentText , String subText , String msgID) {
+
+		String intentAction = "com.celepar.expresso.NOTIFICATION";
 		
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-		Intent notificationIntent = new Intent(this, ViewMessageActivity.class);
-		notificationIntent.putExtra ("url",routeURL);
-		
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        notification.setLatestEventInfo(this, contentTitle, contentText, contentIntent);
+		String routeViewMessage = "/Mail/Messages/{:TABLET}/" + msgID + "/INBOX";
+        String routeReplyMessage = "/Mail/Message/ReplyMessage/" + msgID + "/INBOX";
+        String routeDeleteMessage = "/Mail/Message/DelMessage/" + msgID + "/INBOX";
         
-        NotificationManager nm = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(1, notification);
+        int requestCodeView = Integer.parseInt(msgID + "0001");
+        int requestCodeReply = Integer.parseInt(msgID + "0002");
+        int requestCodeDel = Integer.parseInt(msgID + "0003");
+        
+        Intent notificationIntent = new Intent(this,MainActivity.class);
+        notificationIntent.setAction(intentAction);
+        notificationIntent.putExtra("ROUTE",routeViewMessage);
+        PendingIntent contentIntent = PendingIntent.getActivity(this,requestCodeView,notificationIntent, 0);
+        
+        Intent notificationReplyIntent = new Intent(this,MainActivity.class);
+        notificationReplyIntent.setAction(intentAction);
+        notificationReplyIntent.putExtra("ROUTE",routeReplyMessage);
+        PendingIntent contentReplyIntent = PendingIntent.getActivity(this, requestCodeReply,notificationReplyIntent, 0);
+        
+        Intent notificationDeleteIntent = new Intent(this,MainActivity.class);
+        notificationDeleteIntent.setAction(intentAction);
+        notificationDeleteIntent.putExtra("ROUTE",routeDeleteMessage);
+        PendingIntent contentDeleteIntent = PendingIntent.getActivity(this,requestCodeDel,notificationDeleteIntent, 0);
+        
+        Notification notif = new Notification.Builder(this)
+        .setContentTitle(contentTitle)
+        .setContentText(contentText).setSmallIcon(R.drawable.ic_launcher)
+        .setContentIntent(contentIntent)
+        .setSubText(subText)
+        .setAutoCancel(true)
+        .addAction(R.drawable.ic_ler_mensagem, "Visualizar", contentIntent)
+        .addAction(R.drawable.ic_responder_mensagem, "Responder", contentReplyIntent)
+        .addAction(R.drawable.ic_excluir_mensagem, "Apagar", contentDeleteIntent).build();
+        
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(Integer.parseInt(msgID), notif);
+        
 	}
 
 	@Override
@@ -94,8 +119,8 @@ public class ExpressoService extends BackgroundService {
 	@Override
 	protected void setConfig(JSONObject config) {
 		try {
-//			if (config.has("apiURL"))
-//				this.mApiURL = config.getString("apiURL");
+			if (config.has("apiURL"))
+				this.mApiURL = config.getString("apiURL");
 			
 			if (config.has("auth"))
 				this.mAuth = config.getString("auth");
@@ -163,14 +188,8 @@ public class ExpressoService extends BackgroundService {
                                     }
 
                                     JSONObject result = response.getJSONObject("result");
-                                    //System.out.println("PASSOU AQUI!!!!");
-                                    
-                                   
                                     SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                                     String now = formatter.format(JsonClient.getInstance().getLastCheckDate()); 
-                                    System.out.println("LAST CHECK DATE!");
-                                    System.out.println(now);
-                                    //System.out.println(result);
                                     if(result != null) {
                                     	
                                     	JSONArray folderArray = result.getJSONArray("messages");
@@ -178,16 +197,13 @@ public class ExpressoService extends BackgroundService {
                                     	for(int i=0;i<folderArray.length();i++){
                                     		
                                     		JSONObject message_object = folderArray.getJSONObject(i);
-
+                                    		
                                     		try {
                                     			
                                     			Date messageDate = formatter.parse(message_object.getString("msgDate"));
-                                    			
-                                    			String currentDate = formatter.format(messageDate); 
-                                    			//System.out.println("DATA:" + currentDate);
-                                    			
+  
                                     			if (messageDate.compareTo((Date)JsonClient.getInstance().getLastCheckDate()) > 0) {
-                                    				showNotification(message_object.getString("msgSubject"),message_object.getString("msgBodyResume"),"notify");
+                                    				showNotification(message_object.getString("msgSubject"),message_object.getJSONObject("msgFrom").getString("mailAddress"),message_object.getString("msgBodyResume"),message_object.getString("msgID"));
                                     			} 
                                     			
                                     		} catch (java.text.ParseException e) {

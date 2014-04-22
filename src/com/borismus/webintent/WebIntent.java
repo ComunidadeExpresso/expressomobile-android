@@ -2,6 +2,8 @@ package com.borismus.webintent;
 
 import com.celepar.expresso.MainActivity;
 
+import com.udinic.accounts_authenticator_example.authentication.AccountGeneral;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,12 +18,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 import android.text.Html;
 
 import org.apache.cordova.api.CallbackContext;
@@ -41,10 +46,11 @@ import org.apache.cordova.api.PluginResult;
  */
 public class WebIntent extends CordovaPlugin {
 
-	//private String onNewIntentCallback = null;
 	private CallbackContext callbackContext = null;
+	
+	private AccountManager mAccountManager;
 
-	//public boolean execute(String action, JSONArray args, String callbackId) {
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
 	    try {
@@ -52,7 +58,6 @@ public class WebIntent extends CordovaPlugin {
 
 	        if (action.equals("startActivity")) {
 	            if (args.length() != 1) {
-	                //return new PluginResult(PluginResult.Status.INVALID_ACTION);
 	                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.INVALID_ACTION));
 	                return false;
 	            }
@@ -75,9 +80,87 @@ public class WebIntent extends CordovaPlugin {
 	            }
 
 	            startActivity(obj.getString("action"), uri, type, extrasMap);
-	            //return new PluginResult(PluginResult.Status.OK);
 	            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 	            return true;
+	            
+	        } else if (action.equals("getAccounts")) {
+	        	
+	        	StringBuilder str = new StringBuilder();
+	        	
+	        	String accountType = "com.celepar.expresso.account";
+	        	String authTokenType = "Acesso total";
+	        	
+	        	mAccountManager = AccountManager.get(cordova.getActivity().getApplicationContext());
+	        	
+	        	final Account availableAccounts[] = mAccountManager.getAccountsByType(accountType);
+	        	
+	        	JSONArray ja = new JSONArray();
+	        	JSONObject j = new JSONObject();
+	        	
+	        	String authToken = "";
+	        	
+                String name[] = new String[availableAccounts.length];
+                for (int i = 0; i < availableAccounts.length; i++) {
+                    name[i] = availableAccounts[i].name;
+                    
+                    JSONObject js = new JSONObject();
+                    
+                    String accoutPassword = mAccountManager.getPassword(availableAccounts[i]);
+                    
+                    mAccountManager.getAuthToken(availableAccounts[i], accountType, null, null,
+			                            null, null);
+                    final Bundle bundle;
+                    
+                    try {
+                    	bundle = mAccountManager.getAuthToken(availableAccounts[i], authTokenType, false, null, null).getResult();
+                    	authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN).toString();
+                    	
+                    } catch (Exception e) {
+                    	
+                    }
+                    String[] arrayString = authToken.split(";",-1); 
+                    
+                    String accountAPIURL = arrayString[0];
+                    authToken = arrayString[1];
+                    
+                    js.put("accountName", availableAccounts[i].name);
+                    js.put("accountPassword", accoutPassword);
+                    js.put("accountAPIURL", accountAPIURL);
+                    js.put("accountAuthToken", authToken);
+                    
+                    ja.put(js);
+                }
+                
+                j.put("accounts", ja);
+                
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK,j.toString()));
+	            return true;
+
+	        } else if (action.equals("createAccount")) {
+	        	
+	        	JSONObject params = args.getJSONObject(0);
+	        	
+	        	String accountName = params.has("accountName")
+                ? params.getString("accountName")
+                : "";
+                
+                String accountPassword = params.has("accountPassword")
+                ? params.getString("accountPassword")
+                : "";
+                
+                String accountAuthToken = params.has("accountAuthToken")
+                ? params.getString("accountAuthToken")
+                : "";
+                
+                String accountAPIURL = params.has("accountAPIURL")
+                ? params.getString("accountAPIURL")
+                : "";
+                
+                this.createAccount(accountName, accountPassword, accountAuthToken, accountAPIURL);
+                
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
+	            return true;
+	        	
 	        } else if (action.equals("saveImage")) {
 	        	
 	        	try {
@@ -294,6 +377,19 @@ public class WebIntent extends CordovaPlugin {
         }
 
         ((DroidGap)this.cordova.getActivity()).sendBroadcast(intent);
+    }
+    
+    private void createAccount(String accountName, String accountPassword, String accountAuthToken, String accountAPIURL) {
+    	
+    	mAccountManager = AccountManager.get(cordova.getActivity().getApplicationContext());
+
+        String accountType = "com.celepar.expresso.account";
+        String authTokenType = "Acesso total";
+        
+        final Account account = new Account(accountName,accountType);
+
+        mAccountManager.addAccountExplicitly(account, accountPassword, null);
+        mAccountManager.setAuthToken(account, authTokenType, accountAPIURL + ";" + accountAuthToken);
     }
     
     private boolean saveImage(String b64String, String fileName, String dirName, Boolean overwrite, CallbackContext callbackContext) throws InterruptedException, JSONException {

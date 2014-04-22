@@ -20,20 +20,21 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         id        = "io.cordova.helloCordova"
         version   = "2.0.0">
-    <name>Hello Cordova</name>
+    <name>Expresso Mobile</name>
 
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Expresso Mobile
     </description>
 
-    <author href="http://cordova.io" email="dev@cordova.apache.org">
-        Apache Cordova Team
+    <author href="http://www.expressolivre.org" email="developer@celepar.pr.gov.br">
+        Expresso Mobile Developer Team.
     </author>
 
-    <access origin="*"/>
-
+    <access origin="*"/> 
+    
     <!-- <content src="http://mysite.com/myapp.html" /> for external pages -->
-    <content src="index.html" />
+
+    <content src="index_android.html" />
 
     <preference name="loglevel" value="DEBUG" />
     <!--
@@ -101,10 +102,13 @@
     <feature name="InAppBrowser">
       <param name="android-package" value="org.apache.cordova.InAppBrowser"/>
     </feature>
+    
     <!-- Deprecated plugins element. Remove in 3.0 -->
     <plugins>
         <plugin name="WebIntent" value="com.borismus.webintent.WebIntent" />
         <plugin name="Base64ToPNG" value="org.apache.cordova.Base64ToPNG"/>
+        <plugin name="File" value="org.apache.cordova.FileUtils" />
+        <plugin name="FileTransfer" value="org.apache.cordova.FileTransfer" />
     </plugins>
     <plugin name="BackgroundServicePlugin" value="com.red_folder.phonegap.plugin.backgroundservice.BackgroundServicePlugin"/>
 </widget>

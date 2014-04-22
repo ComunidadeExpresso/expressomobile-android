@@ -6,10 +6,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.Menu;
+import android.webkit.WebView;
+
 import org.apache.cordova.*;
 
 public class ComposeMessageActivity extends DroidGap {
+	
+	final static String EXTRA_URL = "URL";
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +38,33 @@ public class ComposeMessageActivity extends DroidGap {
             // Handle other intents, such as being started from the home screen
         }
         
-        super.loadUrl("file:///android_asset/www/index_android_compose.html");
+        Uri data = getIntent().getData();
+        
+//        System.out.println("DATA:");
+//        System.out.println(data);
+        
+        String urlString;
+        String authString;
+        Bundle extras = getIntent().getExtras();
+        if(extras == null) {
+            urlString= null;
+            authString = null;
+        } else {
+        	urlString= extras.getString("URL");
+        	authString= extras.getString("AUTH");
+        }
+
+//        
+        System.out.println("URL: " + urlString);
+        System.out.println("AUTH: " + authString);
+//
+//        
+//        System.out.println("ACTION: " + action);
+//        System.out.println("TYPE: " + type);
+        
+        super.loadUrl("file:///android_asset/www/index_android.html");
+        super.loadUrl("javascript:var intent_auth='" + authString + "';");
+        super.loadUrl("javascript:var intent_route='" + urlString + "';");
     }
 
     @Override
@@ -62,6 +94,6 @@ public class ComposeMessageActivity extends DroidGap {
             // Update UI to reflect multiple images being shared
         }
     }
-    
+        
 	
 }
