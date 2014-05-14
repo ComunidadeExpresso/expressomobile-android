@@ -6,3 +6,5 @@
 expresso/build/*
 
 expressoAuthenticator/build/*
+
+.idea/workspace.xml
