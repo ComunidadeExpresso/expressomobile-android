@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    <string name="app_name">AccountAuthenticator</string>
+    <string name="label">Expresso</string>
+    <string name="signup_title">Criar nova conta</string>
+    <string name="login_label">Log in</string>
+</resources>

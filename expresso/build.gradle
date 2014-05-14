@@ -1,0 +1,26 @@
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 14
+    buildToolsVersion '19.0.3'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 19
+    }
+
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            debuggable false
+        }
+    }
+}
+
+dependencies {
+    compile project(':expressoAuthenticator')
+    compile 'com.android.support:support-v4:+'
+    compile files('libs/backgroundserviceplugin-2.9.0.jar')
+    compile files('libs/cordova-2.9.0.jar')
+}
